@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verificador SPE — Epson</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F4F0;
+    --surface: #FFFFFF;
+    --surface2: #F0EFE9;
+    --border: #E2E0D8;
+    --text: #1A1916;
+    --text2: #6B6860;
+    --text3: #9E9C95;
+    --accent: #0A5C36;
+    --accent-light: #E6F2EC;
+    --accent-border: #A8D4BB;
+    --danger: #8B1A1A;
+    --danger-light: #FDF0F0;
+    --danger-border: #E8BABA;
+    --warning: #7A5200;
+    --warning-light: #FFF8EC;
+    --warning-border: #F0D898;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 40px 20px;
+    line-height: 1.6;
+  }
+  .page {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .header {
+    margin-bottom: 36px;
+  }
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .logo-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .logo-text {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  h1 span { font-weight: 600; }
+  .header-sub {
+    font-size: 14px;
+    color: var(--text2);
+  }
+
+  .apikey-section {
+    background: var(--warning-light);
+    border: 1px solid var(--warning-border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .apikey-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .apikey-label {
+    font-size: 12px;
+    color: var(--warning);
+    font-weight: 500;
+    margin-bottom: 6px;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .apikey-input {
+    width: 100%;
+    font-size: 13px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--warning-border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+  }
+  .apikey-hint {
+    font-size: 12px;
+    color: var(--warning);
+    margin-top: 4px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 10px;
+  }
+  textarea {
+    width: 100%;
+    min-height: 140px;
+    font-size: 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    resize: vertical;
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.65;
+    transition: border-color 0.15s;
+  }
+  textarea:focus { outline: none; border-color: var(--accent); }
+  textarea::placeholder { color: var(--text3); }
+
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+  }
+  button:hover { background: var(--bg); border-color: #ccc; }
+  button:active { transform: scale(0.98); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-accent {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn-accent:hover { background: #084d2e; border-color: #084d2e; }
+  .btn-ghost { background: transparent; border-color: var(--border); color: var(--text2); }
+
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+  .criteria-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .crit-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .crit-icon { font-size: 16px; margin-top: 1px; flex-shrink: 0; }
+  .crit-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .crit-status { font-size: 12px; margin-top: 2px; }
+  .ok { color: var(--accent); }
+  .no { color: var(--danger); }
+
+  .missing-box {
+    background: var(--danger-light);
+    border: 1px solid var(--danger-border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+  }
+  .missing-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--danger);
+    margin-bottom: 14px;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .mfield { margin-bottom: 12px; }
+  .mfield:last-child { margin-bottom: 0; }
+  .mfield-label { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 5px; }
+  .mfield input {
+    width: 100%;
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--danger-border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .mfield input:focus { outline: none; border-color: var(--danger); }
+
+  .result-box {
+    background: var(--accent-light);
+    border: 1px solid var(--accent-border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .result-title {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 12px;
+  }
+  .result-text {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.75;
+  }
+
+  .loading {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text2);
+    padding: 12px 0;
+  }
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .hidden { display: none; }
+
+  @media (max-width: 480px) {
+    .criteria-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="logo-row">
+      <div class="logo-dot"></div>
+      <span class="logo-text">Epson Americas · Herramienta interna</span>
+    </div>
+    <h1>Verificador de <span>Redacciones SPE</span></h1>
+    <p class="header-sub">Analiza la redacción del vendedor contra los 6 criterios requeridos y genera la versión final.</p>
+  </div>
+
+  <div class="apikey-section">
+    <div class="apikey-icon">🔑</div>
+    <div style="flex:1">
+      <div class="apikey-label">API Key de Anthropic</div>
+      <input class="apikey-input" type="password" id="apiKey" placeholder="sk-ant-api03-..." />
+      <div class="apikey-hint">Consigue tu key en console.anthropic.com · No se guarda ni se envía a ningún servidor externo salvo Anthropic.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Paso 1 — Redacción original del vendedor</div>
+    <textarea id="inputText" placeholder="Pega aquí la redacción que te envió el vendedor..."></textarea>
+    <div class="btn-row">
+      <button class="btn-accent" id="btnAnalyze" onclick="doAnalyze()">Analizar redacción →</button>
+      <button class="btn-ghost hidden" id="btnReset" onclick="doReset()">Nueva redacción</button>
+    </div>
+    <div class="loading" id="ldAnalyze"><div class="spinner"></div> Analizando contra los 6 criterios...</div>
+  </div>
+
+  <div class="card hidden" id="secAnalysis">
+    <div class="card-label">Paso 2 — Resultado del análisis</div>
+    <div class="criteria-grid" id="criteriaGrid"></div>
+
+    <div class="missing-box hidden" id="missingBox">
+      <div class="missing-title">⚠ Información faltante — completa los campos</div>
+      <div id="missingFields"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-accent hidden" id="btnComplete" onclick="doComplete()">Completar redacción →</button>
+      <button class="btn-accent hidden" id="btnGenerate" onclick="doComplete()">Generar redacción final →</button>
+    </div>
+    <div class="loading" id="ldComplete"><div class="spinner"></div> Generando redacción completa...</div>
+  </div>
+
+  <div class="card hidden" id="secResult">
+    <div class="card-label">Paso 3 — Redacción final</div>
+    <div class="result-box">
+      <div class="result-title">✓ Lista para copiar al SPE</div>
+      <div class="result-text" id="resultText"></div>
+    </div>
+    <div class="btn-row">
+      <button onclick="doCopy(this)">Copiar redacción</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const CRITERIA = [
+  { key: 'end_user', label: 'End user', desc: 'Nombre, tipo y país del cliente final' },
+  { key: 'situation', label: 'Situación actual', desc: 'Base instalada, equipos actuales, contexto' },
+  { key: 'project_needs', label: 'Necesidades del proyecto', desc: 'Cantidad, velocidad si aplica, tipo de documentos' },
+  { key: 'price_logic', label: 'Lógica del precio especial', desc: 'TCO, competencia, presupuesto' },
+  { key: 'allocation', label: 'Entrega', desc: 'Fecha, parciales o única, país' },
+  { key: 'website', label: 'Sitio web', desc: 'URL del cliente final' }
+];
+
+let analysis = null;
+
+async function callClaude(prompt) {
+  const key = document.getElementById('apiKey').value.trim();
+  if (!key) { alert('Por favor ingresa tu API Key de Anthropic.'); throw new Error('No API key'); }
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || 'Error en la API');
+  }
+  const data = await res.json();
+  return data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+}
+
+async function doAnalyze() {
+  const txt = document.getElementById('inputText').value.trim();
+  if (!txt) { alert('Por favor ingresa una redacción para analizar.'); return; }
+  const btn = document.getElementById('btnAnalyze');
+  btn.disabled = true;
+  document.getElementById('ldAnalyze').style.display = 'flex';
+  document.getElementById('secAnalysis').classList.add('hidden');
+  document.getElementById('secResult').classList.add('hidden');
+
+  const prompt = `Analiza esta redacción SPE de Epson y determina si contiene los 6 criterios. Responde SOLO con JSON válido sin markdown ni backticks.
+
+Criterios:
+1. end_user: nombre, tipo organización, país del cliente final
+2. situation: base instalada actual, contexto, equipos existentes
+3. project_needs: cantidad equipos, velocidad si aplica, tipo documentos, formato
+4. price_logic: por qué se solicita precio especial (TCO, competencia, presupuesto)
+5. allocation: fecha entrega, acepta parciales, país entrega
+6. website: URL sitio web cliente final
+
+Redacción: "${txt}"
+
+Responde ÚNICAMENTE con este JSON (sin texto adicional):
+{"end_user":{"present":true,"question":""},"situation":{"present":false,"question":"pregunta corta si falta"},"project_needs":{"present":true,"question":""},"price_logic":{"present":false,"question":"pregunta corta si falta"},"allocation":{"present":true,"question":""},"website":{"present":false,"question":"pregunta corta si falta"}}`;
+
+  try {
+    const raw = await callClaude(prompt);
+    const clean = raw.replace(/```json|```/g, '').trim();
+    analysis = JSON.parse(clean);
+    renderAnalysis();
+    document.getElementById('btnReset').classList.remove('hidden');
+  } catch(e) {
+    alert('Error: ' + e.message);
+  } finally {
+    document.getElementById('ldAnalyze').style.display = 'none';
+    btn.disabled = false;
+  }
+}
+
+function renderAnalysis() {
+  const grid = document.getElementById('criteriaGrid');
+  grid.innerHTML = '';
+  let missing = 0;
+
+  CRITERIA.forEach(c => {
+    const r = analysis[c.key];
+    const ok = r && r.present;
+    if (!ok) missing++;
+    const el = document.createElement('div');
+    el.className = 'crit-card';
+    el.innerHTML = `
+      <span class="crit-icon ${ok ? 'ok' : 'no'}">${ok ? '✓' : '✗'}</span>
+      <div>
+        <div class="crit-name">${c.label}</div>
+        <div class="crit-status ${ok ? 'ok' : 'no'}">${ok ? 'Presente' : 'Falta información'}</div>
+      </div>`;
+    grid.appendChild(el);
+  });
+
+  const missingBox = document.getElementById('missingBox');
+  const fields = document.getElementById('missingFields');
+  fields.innerHTML = '';
+
+  if (missing > 0) {
+    CRITERIA.forEach(c => {
+      const r = analysis[c.key];
+      if (!r || !r.present) {
+        const d = document.createElement('div');
+        d.className = 'mfield';
+        d.innerHTML = `<div class="mfield-label">${c.label}</div><input type="text" id="f_${c.key}" placeholder="${r && r.question ? r.question : c.desc}">`;
+        fields.appendChild(d);
+      }
+    });
+    missingBox.classList.remove('hidden');
+    document.getElementById('btnComplete').classList.remove('hidden');
+    document.getElementById('btnGenerate').classList.add('hidden');
+  } else {
+    missingBox.classList.add('hidden');
+    document.getElementById('btnComplete').classList.add('hidden');
+    document.getElementById('btnGenerate').classList.remove('hidden');
+  }
+
+  document.getElementById('secAnalysis').classList.remove('hidden');
+}
+
+async function doComplete() {
+  const txt = document.getElementById('inputText').value.trim();
+  const btnC = document.getElementById('btnComplete');
+  const btnG = document.getElementById('btnGenerate');
+  btnC.disabled = true;
+  btnG.disabled = true;
+
+  let extras = '';
+  CRITERIA.forEach(c => {
+    const inp = document.getElementById('f_' + c.key);
+    if (inp && inp.value.trim()) extras += `\n- ${c.label}: ${inp.value.trim()}`;
+  });
+
+  document.getElementById('ldComplete').style.display = 'flex';
+  document.getElementById('secResult').classList.add('hidden');
+
+  const prompt = `Eres experto en redacciones SPE para Epson. Reescribe en español la siguiente redacción integrando toda la información.
+
+Redacción original: "${txt}"
+${extras ? `\nInformación adicional proporcionada:\n${extras}` : ''}
+
+Instrucciones:
+- Un solo párrafo continuo, fluido y profesional
+- Sigue este orden: cliente y país → situación actual → necesidades del proyecto → lógica del precio especial → condiciones de entrega
+- Termina exactamente con: "El sitio web del usuario final es www.DOMINIO"
+- Sin títulos, sin listas, sin encabezados
+- Devuelve únicamente el párrafo final, nada más`;
+
+  try {
+    const result = await callClaude(prompt);
+    document.getElementById('resultText').innerText = result.trim();
+    document.getElementById('secResult').classList.remove('hidden');
+  } catch(e) {
+    alert('Error: ' + e.message);
+  } finally {
+    document.getElementById('ldComplete').style.display = 'none';
+    btnC.disabled = false;
+    btnG.disabled = false;
+  }
+}
+
+function doCopy(btn) {
+  const t = document.getElementById('resultText').innerText;
+  navigator.clipboard.writeText(t).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '¡Copiado!';
+    setTimeout(() => btn.innerHTML = orig, 2000);
+  });
+}
+
+function doReset() {
+  document.getElementById('inputText').value = '';
+  document.getElementById('secAnalysis').classList.add('hidden');
+  document.getElementById('secResult').classList.add('hidden');
+  document.getElementById('btnReset').classList.add('hidden');
+  analysis = null;
+}
+</script>
+</body>
+</html>
